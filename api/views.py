@@ -17,19 +17,57 @@ def index(request):
 @parser_classes((JSONParser,))
 def tests(request):
     queryset = Test.objects.all()
+    data = request.data # typ dict
     if request.method == 'POST':
-        data = request.data
         if data["method"] == "list":
             if "id" in data:
-                id = request.data["id"]
+                id = data["id"]
                 queryset = Test.objects.filter(id__exact=id)
-        serializer = TestSerializer(queryset, many=True, context={'request': request})
-        data = request.data
-        return Response(serializer.data)
+                serializer = TestSerializer(queryset, many=True, context={'request': request})
+                return Response(serializer.data)
+        if data["method"] == "get_key":
+            if "test_id" in data:
+                test_id = data["test_id"]
+                queryset = Test.objects.filter(id__exact=test_id).values('key')
+                return Response(queryset)
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
-        data = request.data
     return Response(serializer.data)
+
+@api_view(['GET', 'POST'])
+@parser_classes((JSONParser,))
+def questions(request):
+    data = request.data # typ dict
+    if request.method == 'POST':
+        queryset = Question.objects.all().values('id','content')
+        if data["method"] == "list":
+            if "id" in data:
+                id = data["id"]
+                queryset = Question.objects.filter(id__exact=id).values('id','content')
+        return Response(queryset)
+    if request.method == 'GET':
+        queryset = Question.objects.all()
+        serializer = QuestionSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+@api_view(['GET', 'POST'])
+@parser_classes((JSONParser,))
+def groups(request):
+    data = request.data # typ dict
+    queryset = Group.objects.all()
+    if request.method == 'POST':
+        if data["method"] == "list":
+            if "id" in data:
+                id = data["id"]
+                queryset = Group.objects.filter(id__exact=id)
+        serializer = GroupSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    if request.method == 'GET':
+        serializer = GroupSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    return Response(queryset)
+
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
