@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 
 class Lecturer(models.Model):
@@ -25,7 +27,7 @@ class Question(models.Model):
     answers = models.ManyToManyField(Answer)
 
     def __str__(self):
-        return '%s / %s' % (self.content, self.TYPES[self.type][1])
+        return '%s ' % (self.content)
 
 
 class Test(models.Model):
@@ -34,20 +36,34 @@ class Test(models.Model):
     name = models.CharField(max_length=64)
     questions = models.ManyToManyField(Question)
 
+    def __str__(self):
+        return '%s' % (self.name)
+
 
 class SolvedTest(models.Model):
     test = models.ForeignKey(Test)
     answers = models.ManyToManyField(Answer)
 
+    def __str__(self):
+        return '%s, %s' % (self.test, self.answers)
+
+    def __unicode__(self):
+        return '%s, %s' % (self.test, self.answers)
+
 
 class Student(models.Model):
-    name = models.CharField(max_length=50, default='Imie')
-    login = models.CharField(max_length=50, unique=True)
-    password = models.CharField(max_length=64)
-    solved_test = models.ManyToManyField(SolvedTest)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    solved_tests = models.ManyToManyField(SolvedTest)
 
     def __str__(self):
-        return '%d %s' % (self.id, self.login)
+        return '%d, %s' % (self.id, self.user)
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+       profile, created = Student.objects.get_or_create(user=instance)
+
+post_save.connect(create_user_profile, sender=User)
 
 
 class Group(models.Model):
