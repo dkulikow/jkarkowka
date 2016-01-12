@@ -1,9 +1,9 @@
 from django.http import HttpResponse
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from api.models import Student, Question, SolvedTest, Test
+from api.models import Student, Question, SolvedTest, Test, Group
 from api.serializers import GroupSerializer, UserSerializer, StudentSerializer, QuestionSerializer, SolvedTestSerializer, TestSerializer
 from rest_framework.decorators import api_view, parser_classes, detail_route
 from rest_framework.parsers import JSONParser
@@ -20,10 +20,10 @@ def tests(request):
     data = request.data # typ dict
     if request.method == 'POST':
         if data["method"] == "list":
+            serializer = TestSerializer(queryset, many=True, context={'request': request})
             if "id" in data:
                 id = data["id"]
                 queryset = Test.objects.filter(id__exact=id)
-                serializer = TestSerializer(queryset, many=True, context={'request': request})
                 return Response(serializer.data)
         if data["method"] == "get_key":
             if "test_id" in data:
@@ -33,6 +33,7 @@ def tests(request):
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
+
 
 @api_view(['GET', 'POST'])
 @parser_classes((JSONParser,))
@@ -50,11 +51,13 @@ def questions(request):
         serializer = QuestionSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
+
 @api_view(['GET', 'POST'])
 @parser_classes((JSONParser,))
 def groups(request):
     data = request.data # typ dict
     queryset = Group.objects.all()
+
     if request.method == 'POST':
         if data["method"] == "list":
             if "id" in data:

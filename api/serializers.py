@@ -1,18 +1,18 @@
-from django.contrib.auth.models import User, Group
-from api.models import Student, Question, Answer, SolvedTest, Test
+from django.contrib.auth.models import User
+from api.models import Student, Question, Answer, SolvedTest, Test, Group, Lecturer
 from rest_framework import serializers
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'username', 'email', 'groups')
+        fields = ('id', 'username', 'email')
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
+class LecturerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Group
-        fields = ('url', 'name')
+        model = Lecturer
+        fields = ('name',)
 
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
@@ -69,3 +69,10 @@ class StudentSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('user', 'solved_tests')
 
 
+class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    lecturer = LecturerSerializer()
+    students = StudentSerializer(many=True)
+
+    class Meta:
+        model = Group
+        fields = ('name', 'lecturer', 'students')
