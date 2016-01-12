@@ -21,6 +21,12 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('content', 'good')
 
 
+class HiddenAnswerSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ('content',)
+
+
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     answers = AnswerSerializer(many=True)
 
@@ -35,6 +41,14 @@ class ShortQuestionSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('content',)
 
 
+class QuestionWithoutAnswerSerializer(serializers.HyperlinkedModelSerializer):
+    answers = HiddenAnswerSerializer(many=True)
+
+    class Meta:
+        model = Question
+        fields = ('content', 'type', 'answers')
+
+
 class TestSerializer(serializers.HyperlinkedModelSerializer):
     questions = QuestionSerializer(many=True)
 
@@ -45,6 +59,14 @@ class TestSerializer(serializers.HyperlinkedModelSerializer):
 
 class ShortTestSerializer(serializers.HyperlinkedModelSerializer):
     questions = ShortQuestionSerializer(many=True)
+
+    class Meta:
+        model = Test
+        fields = ('name', 'questions')
+
+
+class TestWithHiddenAnswersSerializer(serializers.HyperlinkedModelSerializer):
+    questions = QuestionWithoutAnswerSerializer(many=True)
 
     class Meta:
         model = Test
@@ -76,3 +98,4 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
         fields = ('name', 'lecturer', 'students')
+
