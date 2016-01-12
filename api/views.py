@@ -30,6 +30,23 @@ def tests(request):
                 test_id = data["test_id"]
                 queryset = Test.objects.filter(id__exact=test_id).values('key')
                 return Response(queryset)
+        if data["method"] == "change_state":
+            test_id = data["test_id"]
+            if "students_id" in data:
+                students_id = data["students_id"]
+            elif "group_id" in data:
+                group_id = data["group_id"]
+            state = data["state"]
+            test = Test.objects.get(id__exact=test_id)
+            test.state = state
+            test.save()
+            return HttpResponse()
+        if data["method"] == "send":
+            test_id = data["test_id"]
+            answers = data["answers"]
+            if request.user.is_authenticated():
+                username = request.user.username
+            return HttpResponse(username + " " + test_id + " " + ' '.join(answers))
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
@@ -69,8 +86,6 @@ def groups(request):
         serializer = GroupSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
     return Response(queryset)
-
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
