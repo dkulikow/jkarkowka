@@ -70,6 +70,7 @@ class Group(models.Model):
     name = models.CharField(max_length=50, default='grupa', unique=True)
     lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE)
     students = models.ManyToManyField(Student)
+    activated_tests = models.ManyToManyField(Test).value_from_object('id')
 
     def __str__(self):
         return '%s, %s' % (self.lecturer, self.name)

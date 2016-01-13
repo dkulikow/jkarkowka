@@ -75,4 +75,4 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Group
-        fields = ('name', 'lecturer', 'students')
+        fields = ('name', 'lecturer', 'students', 'activated_test')
