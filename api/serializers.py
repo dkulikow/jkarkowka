@@ -65,6 +65,12 @@ class ShortTestSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('name', 'questions')
 
 
+class TestStateSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Test
+        fields = ('id', 'state')
+
+
 class TestWithHiddenAnswersSerializer(serializers.HyperlinkedModelSerializer):
     questions = QuestionWithoutAnswerSerializer(many=True)
 
@@ -94,7 +100,8 @@ class StudentSerializer(serializers.HyperlinkedModelSerializer):
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     lecturer = LecturerSerializer()
     students = StudentSerializer(many=True)
+    activated_tests = TestStateSerializer(many=True)
 
     class Meta:
         model = Group
-        fields = ('name', 'lecturer', 'students', 'activated_test')
+        fields = ('name', 'lecturer', 'students', 'activated_tests')
