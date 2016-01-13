@@ -4,7 +4,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from api.models import Student, Question, SolvedTest, Test, Group
-from api.serializers import GroupSerializer, UserSerializer, StudentSerializer, QuestionSerializer, SolvedTestSerializer, TestSerializer
+from api.serializers import GroupSerializer, UserSerializer, StudentSerializer, QuestionSerializer, SolvedTestSerializer, TestSerializer, \
+    ShortTestSerializer, TestWithHiddenAnswersSerializer
 from rest_framework.decorators import api_view, parser_classes, detail_route
 from rest_framework.parsers import JSONParser
 
@@ -18,17 +19,25 @@ def index(request):
 def tests(request):
     queryset = Test.objects.all()
     data = request.data # typ dict
+    serializer = TestSerializer(queryset, many=True, context={'request': request})
     if request.method == 'POST':
         if data["method"] == "list":
-            serializer = TestSerializer(queryset, many=True, context={'request': request})
             if "id" in data:
                 id = data["id"]
                 queryset = Test.objects.filter(id__exact=id)
+                serializer = TestSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        if data["method"] == "get_test":
+            if "test_id" in data:
+                test_id = data["test_id"]
+                queryset = Test.objects.filter(id__exact=test_id)
+                serializer = TestWithHiddenAnswersSerializer(queryset, many=True, context={'request': request})
                 return Response(serializer.data)
         if data["method"] == "get_key":
             if "test_id" in data:
                 test_id = data["test_id"]
                 queryset = Test.objects.filter(id__exact=test_id).values('key')
+                serializer = TestSerializer(queryset, many=True, context={'request': request})
                 return Response(queryset)
         if data["method"] == "change_state":
             test_id = data["test_id"]
