@@ -18,7 +18,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework import routers
 from api import views
-from api.views import index, tests, questions, groups
+from api.views import index, tests, questions, groups, user
 
 admin.site.site_header = 'JKartkówka Admin Site'
 admin.site.site_title = "JKartkówka"
@@ -37,6 +37,6 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'tests', tests, name='tests'),
     url(r'questions', questions, name='questions'),
-    url(r'groups', groups, name='groups')
-
+    url(r'groups', groups, name='groups'),
+    url(r'user', user, name='user')
 ]

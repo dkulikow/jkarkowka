@@ -1,9 +1,11 @@
+import json
+
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from api.models import Student, Question, SolvedTest, Test, Group
+from api.models import Student, Question, SolvedTest, Test, Group, Lecturer
 from api.serializers import GroupSerializer, UserSerializer, StudentSerializer, QuestionSerializer, SolvedTestSerializer, TestSerializer, \
     ShortTestSerializer, TestWithHiddenAnswersSerializer
 from rest_framework.decorators import api_view, parser_classes, detail_route
@@ -83,7 +85,6 @@ def questions(request):
 def groups(request):
     data = request.data # typ dict
     queryset = Group.objects.all()
-
     if request.method == 'POST':
         if data["method"] == "list":
             if "id" in data:
@@ -95,6 +96,24 @@ def groups(request):
         serializer = GroupSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
     return Response(queryset)
+
+
+@api_view(['GET', 'POST'])
+@parser_classes((JSONParser,))
+def user(request):
+    data = request.data # typ dict
+    response_data = {}
+    response_data['result'] = 'error'
+    if request.method == 'POST':
+        if data["method"] == "about":
+            username = request.user.username
+            student_queryset = Student.objects.filter(user__username=username)
+            lecturer_queryset = Lecturer.objects.filter(user__username=username)
+            if student_queryset.count() > 0:
+                response_data['result'] = '1'
+            elif lecturer_queryset.count() >0:
+                response_data['result'] = '0'
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
 class UserViewSet(viewsets.ModelViewSet):

@@ -4,12 +4,11 @@ from django.db.models.signals import post_save
 
 
 class Lecturer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     name = models.CharField(max_length=50, default='Imie')
-    login = models.CharField(max_length=50)
-    password = models.CharField(max_length=64)
 
     def __str__(self):
-        return '%s' % (self.login)
+        return '%d, %s' % (self.id, self.user)
 
 
 class Answer(models.Model):
@@ -59,18 +58,18 @@ class Student(models.Model):
         return '%d, %s' % (self.id, self.user)
 
 
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-       profile, created = Student.objects.get_or_create(user=instance)
-
-post_save.connect(create_user_profile, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#        profile, created = Student.objects.get_or_create(user=instance)
+#
+# post_save.connect(create_user_profile, sender=User)
 
 
 class Group(models.Model):
     name = models.CharField(max_length=50, default='grupa', unique=True)
     lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE)
     students = models.ManyToManyField(Student)
-    activated_tests = models.ManyToManyField(Test)
+    activated_tests = models.ManyToManyField(Test, blank=True)
 
     def __str__(self):
         return '%s, %s' % (self.lecturer, self.name)

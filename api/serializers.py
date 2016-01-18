@@ -104,4 +104,4 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Group
-        fields = ('name', 'lecturer', 'students', 'activated_tests')
+        fields = ('id', 'name', 'lecturer', 'students', 'activated_tests')
