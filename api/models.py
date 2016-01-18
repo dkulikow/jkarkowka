@@ -39,9 +39,13 @@ class Test(models.Model):
         return '%s' % (self.name)
 
 
+class SubmittedAnswer(models.Model):
+    answer = models.CharField(max_length=64)
+
+
 class SolvedTest(models.Model):
     test = models.ForeignKey(Test)
-    answers = models.ManyToManyField(Answer)
+    answers = models.ManyToManyField(SubmittedAnswer)
 
     def __str__(self):
         return '%s, %s' % (self.test, self.answers)
@@ -52,7 +56,7 @@ class SolvedTest(models.Model):
 
 class Student(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
-    solved_tests = models.ManyToManyField(SolvedTest)
+    solved_tests = models.ManyToManyField(SolvedTest, blank=True)
 
     def __str__(self):
         return '%d, %s' % (self.id, self.user)

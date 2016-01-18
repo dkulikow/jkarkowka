@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from api.models import Student, Question, SolvedTest, Test, Group, Lecturer
+from api.models import Student, Question, SolvedTest, Test, Group, Lecturer, SubmittedAnswer
 from api.serializers import GroupSerializer, UserSerializer, StudentSerializer, QuestionSerializer, SolvedTestSerializer, TestSerializer, \
     ShortTestSerializer, TestWithHiddenAnswersSerializer
 from rest_framework.decorators import api_view, parser_classes, detail_route
@@ -57,7 +57,17 @@ def tests(request):
             answers = data["answers"]
             if request.user.is_authenticated():
                 username = request.user.username
-            return HttpResponse(username + " " + test_id + " " + ' '.join(answers))
+                test = Test.objects.get(id__exact=test_id)
+                solved_test = SolvedTest(test=test)
+                solved_test.save()
+                for answer in answers:
+                    my_ans = SubmittedAnswer(answer=answer)
+                    my_ans.save()
+                    solved_test.answers.add(my_ans)
+                solved_test.save()
+                queryset = SolvedTest.objects.all()
+                serializer = SolvedTest(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
@@ -102,8 +112,7 @@ def groups(request):
 @parser_classes((JSONParser,))
 def user(request):
     data = request.data # typ dict
-    response_data = {}
-    response_data['result'] = 'error'
+    response_data = {'result': 'error'}
     if request.method == 'POST':
         if data["method"] == "about":
             username = request.user.username
