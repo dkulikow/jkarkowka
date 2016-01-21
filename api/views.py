@@ -84,16 +84,15 @@ def tests(request):
                     answer_object = Answer.objects.get(id__exact=answer["answer_id"])
                     if answer_object.good:
                         score += 1
-                    solved_test.answers.add(answer_object)
                 solved_test.score = score
                 solved_test.max = len(received_answers)
                 solved_test.save()
                 student = Student.objects.get(user__username=username)
                 student.solved_tests.add(solved_test)
                 student.save()
-                queryset = SolvedTest.objects.all()
-                serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
-            return Response(serializer.data)
+                # queryset = SolvedTest.objects.all()
+                # serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
+            return HttpResponse()
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
