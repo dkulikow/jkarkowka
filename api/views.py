@@ -70,7 +70,7 @@ def tests(request):
                     group = Group.objects.filter(id__exact=group_id)
                     relations = ActiveTestForGroup.objects.filter(group=group)
                     relations.delete()
-            response_data = {"test_name": test.name}
+            response_data = [{"test_name": test.name}]
             return HttpResponse(json.dumps(response_data), content_type="application/json")
         if data["method"] == "send":
             if request.user.is_authenticated():
