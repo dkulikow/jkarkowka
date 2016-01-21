@@ -46,8 +46,8 @@ class SubmittedAnswer(models.Model):
 
 class SolvedTest(models.Model):
     test = models.ForeignKey(Test)
-    answers = models.ManyToManyField(Answer)
     score = models.IntegerField(default=0, blank=True, editable=False)
+    max = models.IntegerField(default=0, blank=True, editable=False)
 
     def __str__(self):
         return '%s, %s' % (self.test, self.answers)
@@ -77,7 +77,13 @@ class ActiveTestForGroup(models.Model):
     group = models.ForeignKey(Group)
     test = models.ForeignKey(Test)
 
+    def __str__(self):
+        return '%s, %s' % (self.group.name, self.test.id)
+
 
 class ActiveTestForStudent(models.Model):
     student = models.ForeignKey(Student)
     test = models.ForeignKey(Test)
+
+    def __str__(self):
+        return '%s, %s' % (self.student.name, self.test.id)

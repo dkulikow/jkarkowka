@@ -37,9 +37,10 @@ def tests(request):
         if data["method"] == "get_key":
             if "test_id" in data:
                 test_id = data["test_id"]
-                queryset = Test.objects.filter(id__exact=test_id).values('key')
-                serializer = TestSerializer(queryset, many=True, context={'request': request})
-                return Response(queryset)
+                key = Test.objects.get(id__exact=test_id).key
+                print(type(key))
+                response_data = [{"key": key}]
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
         if data["method"] == "change_state":
             test_id = data["test_id"]
             test = Test.objects.get(id__exact=test_id)
@@ -57,6 +58,8 @@ def tests(request):
                     activated_relation = ActiveTestForGroup(group=group, test=test)
                     activated_relation.save()
             elif state == "0":
+                test.key = random.randint(0,15)
+                test.save()
                 if "students_id" in data:
                     students_id = data["students_id"]
                     print(students_id)
@@ -75,7 +78,6 @@ def tests(request):
                 test_id = data["test_id"]
                 received_answers = data["answers"]
                 username = request.user.username
-
                 test = Test.objects.get(id__exact=test_id)
                 solved_test = SolvedTest(test=test)
                 solved_test.save()
@@ -84,15 +86,22 @@ def tests(request):
                     answer_object = Answer.objects.get(id__exact=answer["answer_id"])
                     if answer_object.good:
                         score += 1
-                    solved_test.answers.add(answer_object)
                 solved_test.score = score
+                solved_test.max = len(received_answers)
                 solved_test.save()
                 student = Student.objects.get(user__username=username)
                 student.solved_tests.add(solved_test)
                 student.save()
-                queryset = SolvedTest.objects.all()
+                # queryset = SolvedTest.objects.all()
+                # serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
+            return HttpResponse()
+        if data["method"] == "give_me_my_grades_bitch":
+            if request.user.is_authenticated():
+                username = request.user.username
+                student = Student.objects.get(user__username=username)
+                queryset = student.solved_tests.all()
                 serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
-            return Response(serializer.data)
+                return Response(serializer.data)
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
