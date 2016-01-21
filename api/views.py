@@ -19,7 +19,7 @@ def index(request):
 @parser_classes((JSONParser,))
 def tests(request):
     queryset = Test.objects.all()
-    data = request.data # typ dict
+    data = request.data  # typ dict
     serializer = TestSerializer(queryset, many=True, context={'request': request})
     if request.method == 'POST':
         if data["method"] == "list":
@@ -101,13 +101,13 @@ def tests(request):
 @api_view(['GET', 'POST'])
 @parser_classes((JSONParser,))
 def questions(request):
-    data = request.data # typ dict
+    data = request.data  # typ dict
     if request.method == 'POST':
         queryset = Question.objects.all().values('id', 'content')
         if data["method"] == "list":
             if "id" in data:
                 id = data["id"]
-                queryset = Question.objects.filter(id__exact=id).values('id','content')
+                queryset = Question.objects.filter(id__exact=id).values('id', 'content')
         return Response(queryset)
     if request.method == 'GET':
         queryset = Question.objects.all()
@@ -118,17 +118,29 @@ def questions(request):
 @api_view(['GET', 'POST'])
 @parser_classes((JSONParser,))
 def groups(request):
-    data = request.data # typ dict
+    data = request.data  # typ dict
     queryset = Group.objects.all()
     if request.method == 'POST':
         if data["method"] == "list":
             if "id" in data:
                 id = data["id"]
                 queryset = Group.objects.filter(id__exact=id)
-        serializer = GroupSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+                serializer = StudentsInGroupSerializer(queryset, many=True, context={'request': request})
+                return Response(serializer.data)
+            else:
+                username = request.user.username
+                student_queryset = Student.objects.filter(user__username=username)
+                lecturer_queryset = Lecturer.objects.filter(user__username=username)
+                if lecturer_queryset.count() > 0:
+                    queryset = Group.objects.filter(lecturer__user__username=username)
+                    serializer = GroupSerializer(queryset, many=True, context={'request': request})
+                    return Response(serializer.data)
+                elif student_queryset.count() > 0:
+                    queryset = Group.objects.filter(students__user__username=username)
+                    serializer = GroupSerializer(queryset, many=True, context={'request': request})
+                    return Response(serializer.data)
     if request.method == 'GET':
-        serializer = GroupSerializer(queryset, many=True, context={'request': request})
+        serializer = StudentsInGroupSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
     return Response(queryset)
 
@@ -136,7 +148,7 @@ def groups(request):
 @api_view(['GET', 'POST'])
 @parser_classes((JSONParser,))
 def user(request):
-    data = request.data # typ dict
+    data = request.data  # typ dict
     response_data = {'result': 'error'}
     if request.method == 'POST':
         if data["method"] == "about":
@@ -163,7 +175,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = Group.objects.all()
-    serializer_class = GroupSerializer
+    serializer_class = StudentsInGroupSerializer
 
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -188,5 +200,3 @@ class SolvedTestViewSet(viewsets.ModelViewSet):
     """
     queryset = SolvedTest.objects.all()
     serializer_class = SolvedTestSerializer
-
-

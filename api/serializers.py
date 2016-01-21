@@ -3,6 +3,12 @@ from api.models import Student, Question, Answer, SolvedTest, Test, Group, Lectu
 from rest_framework import serializers
 
 
+class UserWithoutEmailSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -103,10 +109,25 @@ class StudentSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('user', 'solved_tests')
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
-    lecturer = LecturerSerializer()
-    students = StudentSerializer(many=True)
+class StudentWithoutEmailSerializer(serializers.HyperlinkedModelSerializer):
+    user = UserWithoutEmailSerializer()
+
+    class Meta:
+        model = Student
+        fields = ('user',)
+
+
+class StudentsInGroupSerializer(serializers.HyperlinkedModelSerializer):
+    students = StudentWithoutEmailSerializer(many=True)
 
     class Meta:
         model = Group
-        fields = ('id', 'name', 'lecturer', 'students',)
+        fields = ('students',)
+
+
+class GroupSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Group
+        fields = ('id','name',)
+
