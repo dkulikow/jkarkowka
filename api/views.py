@@ -37,9 +37,10 @@ def tests(request):
         if data["method"] == "get_key":
             if "test_id" in data:
                 test_id = data["test_id"]
-                queryset = Test.objects.filter(id__exact=test_id).values('key')
-                serializer = TestSerializer(queryset, many=True, context={'request': request})
-                return Response(queryset)
+                key = Test.objects.get(id__exact=test_id).key
+                print(type(key))
+                response_data = [{"key": key}]
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
         if data["method"] == "change_state":
             test_id = data["test_id"]
             test = Test.objects.get(id__exact=test_id)
