@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from api.models import Student, Question, Answer, SolvedTest, Test, Group, Lecturer
+from api.models import Student, Question, Answer, SolvedTest, Test, Group, Lecturer, SubmittedAnswer
 from rest_framework import serializers
 
 
@@ -24,7 +24,7 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
 class HiddenAnswerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Answer
-        fields = ('content',)
+        fields = ('id', 'content')
 
 
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
@@ -62,7 +62,7 @@ class ShortTestSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Test
-        fields = ('name', 'questions')
+        fields = ('id', 'name', 'questions')
 
 
 class TestStateSerializer(serializers.HyperlinkedModelSerializer):
@@ -79,9 +79,15 @@ class TestWithHiddenAnswersSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('name', 'questions')
 
 
+class SubmittedAnswerSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SubmittedAnswer
+        fields = ('answer',)
+
+
 class SolvedTestSerializer(serializers.HyperlinkedModelSerializer):
     test = ShortTestSerializer(many=False)
-    answers = AnswerSerializer(many=True)
+    answers = SubmittedAnswerSerializer(many=True)
 
     class Meta:
         model = SolvedTest

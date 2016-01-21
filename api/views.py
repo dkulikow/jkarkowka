@@ -5,9 +5,8 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from api.models import Student, Question, SolvedTest, Test, Group, Lecturer, SubmittedAnswer
-from api.serializers import GroupSerializer, UserSerializer, StudentSerializer, QuestionSerializer, SolvedTestSerializer, TestSerializer, \
-    ShortTestSerializer, TestWithHiddenAnswersSerializer
+from api.models import *
+from api.serializers import *
 from rest_framework.decorators import api_view, parser_classes, detail_route
 from rest_framework.parsers import JSONParser
 
@@ -43,15 +42,34 @@ def tests(request):
                 return Response(queryset)
         if data["method"] == "change_state":
             test_id = data["test_id"]
-            if "students_id" in data:
-                students_id = data["students_id"]
-            elif "group_id" in data:
-                group_id = data["group_id"]
-            state = data["state"]
             test = Test.objects.get(id__exact=test_id)
-            test.state = state
-            test.save()
-            return HttpResponse()
+            state = data["state"]
+            if state == "1":
+                if "students_id" in data:
+                    students_id = data["students_id"]
+                    for student_id in students_id:
+                        student = Student.objects.get(id__exact=student_id)
+                        activated_relation = ActiveTestForStudent(student=student, test=test)
+                        activated_relation.save()
+                elif "group_id" in data:
+                    group_id = data["group_id"]
+                    group = Group.objects.get(id__exact=group_id)
+                    activated_relation = ActiveTestForGroup(group=group, test=test)
+                    activated_relation.save()
+            elif state == "0":
+                if "students_id" in data:
+                    students_id = data["students_id"]
+                    print(students_id)
+                    students = Student.objects.filter(id__in=students_id)
+                    relations = ActiveTestForStudent.objects.filter(student__in=students)
+                    relations.delete()
+                elif "group_id" in data:
+                    group_id = data["group_id"]
+                    group = Group.objects.filter(id__exact=group_id)
+                    relations = ActiveTestForGroup.objects.filter(group=group)
+                    relations.delete()
+            response_data = {"test_name": test.name}
+            return HttpResponse(json.dumps(response_data), content_type="application/json")
         if data["method"] == "send":
             test_id = data["test_id"]
             answers = data["answers"]
@@ -60,13 +78,25 @@ def tests(request):
                 test = Test.objects.get(id__exact=test_id)
                 solved_test = SolvedTest(test=test)
                 solved_test.save()
-                for answer in answers:
-                    my_ans = SubmittedAnswer(answer=answer)
+                for ans in answers:
+                    print(ans)
+                    my_ans = SubmittedAnswer(answer=ans)
                     my_ans.save()
                     solved_test.answers.add(my_ans)
+                score = 0
+                questions = test.questions.all()
+                for question in questions:
+                    all_answers = question.answers.all()
+                    for ans in all_answers:
+                        for sub_ans in answers:
+                            if ans.content == sub_ans:
+                                score += 1
                 solved_test.save()
+                student = Student.objects.get(user__username=username)
+                student.solved_tests.add(solved_test)
+                student.save()
                 queryset = SolvedTest.objects.all()
-                serializer = SolvedTest(queryset, many=True, context={'request': request})
+                serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
             return Response(serializer.data)
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
@@ -78,7 +108,7 @@ def tests(request):
 def questions(request):
     data = request.data # typ dict
     if request.method == 'POST':
-        queryset = Question.objects.all().values('id','content')
+        queryset = Question.objects.all().values('id', 'content')
         if data["method"] == "list":
             if "id" in data:
                 id = data["id"]
@@ -120,7 +150,7 @@ def user(request):
             lecturer_queryset = Lecturer.objects.filter(user__username=username)
             if student_queryset.count() > 0:
                 response_data['result'] = '1'
-            elif lecturer_queryset.count() >0:
+            elif lecturer_queryset.count() > 0:
                 response_data['result'] = '0'
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 

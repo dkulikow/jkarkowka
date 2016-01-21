@@ -1,18 +1,19 @@
+import random
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 
 
 class Lecturer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
-    name = models.CharField(max_length=50, default='Imie')
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, default='Name')
 
     def __str__(self):
         return '%d, %s' % (self.id, self.user)
 
 
 class Answer(models.Model):
-    content = models.CharField(max_length=120, default='treść odpowiedzi')
+    content = models.CharField(max_length=120, default='Answer')
     good = models.BooleanField(default=True)
 
     def __str__(self):
@@ -20,23 +21,23 @@ class Answer(models.Model):
 
 
 class Question(models.Model):
-    TYPES = ((0, 'zamkniete'), (1, 'otwarte'))
     content = models.TextField()
-    type = models.IntegerField(choices=TYPES, default=0)
     answers = models.ManyToManyField(Answer)
 
     def __str__(self):
-        return '%s ' % (self.content)
+        return '%s' % (self.content,)
 
 
 class Test(models.Model):
-    state = models.IntegerField(default=0)
-    key = models.CharField(max_length=64)
     name = models.CharField(max_length=64)
+    key = models.IntegerField(default=random.randint(0, 15), validators=[
+        MaxValueValidator(15),
+        MinValueValidator(0)
+    ])
     questions = models.ManyToManyField(Question)
 
     def __str__(self):
-        return '%s' % (self.name)
+        return '%s' % (self.name,)
 
 
 class SubmittedAnswer(models.Model):
@@ -46,6 +47,7 @@ class SubmittedAnswer(models.Model):
 class SolvedTest(models.Model):
     test = models.ForeignKey(Test)
     answers = models.ManyToManyField(SubmittedAnswer)
+    score = models.IntegerField(default=0, blank=True, editable=False)
 
     def __str__(self):
         return '%s, %s' % (self.test, self.answers)
@@ -55,39 +57,27 @@ class SolvedTest(models.Model):
 
 
 class Student(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     solved_tests = models.ManyToManyField(SolvedTest, blank=True)
 
     def __str__(self):
         return '%d, %s' % (self.id, self.user)
 
 
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#        profile, created = Student.objects.get_or_create(user=instance)
-#
-# post_save.connect(create_user_profile, sender=User)
-
-
 class Group(models.Model):
-    name = models.CharField(max_length=50, default='grupa', unique=True)
+    name = models.CharField(max_length=50, default='Group', unique=True)
     lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE)
     students = models.ManyToManyField(Student)
-    activated_tests = models.ManyToManyField(Test, blank=True)
 
     def __str__(self):
         return '%s, %s' % (self.lecturer, self.name)
 
 
-class StudentSession(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    authToken = models.CharField(max_length=64)
-    refreshToken = models.CharField(max_length=64)
-    expireDate = models.DateTimeField()
+class ActiveTestForGroup(models.Model):
+    group = models.ForeignKey(Group)
+    test = models.ForeignKey(Test)
 
 
-class LecturerSession(models.Model):
-    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE)
-    authToken = models.CharField(max_length=64)
-    refreshToken = models.CharField(max_length=64)
-    expireDate = models.DateTimeField()
+class ActiveTestForStudent(models.Model):
+    student = models.ForeignKey(Student)
+    test = models.ForeignKey(Test)
