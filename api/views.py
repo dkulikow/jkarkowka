@@ -93,6 +93,13 @@ def tests(request):
                 # queryset = SolvedTest.objects.all()
                 # serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
             return HttpResponse()
+        if data["method"] == "give_me_my_grades_bitch":
+            if request.user.is_authenticated():
+                username = request.user.username
+                student = Student.objects.get(user__username=username)
+                queryset = student.solved_tests.all()
+                serializer = SolvedTestSerializer(queryset, many=True, context={'request': request})
+                return Response(serializer.data)
     if request.method == 'GET':
         serializer = TestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)

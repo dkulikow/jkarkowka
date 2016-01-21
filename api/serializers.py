@@ -58,11 +58,9 @@ class TestSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ShortTestSerializer(serializers.HyperlinkedModelSerializer):
-    questions = ShortQuestionSerializer(many=True)
-
     class Meta:
         model = Test
-        fields = ('id', 'name', 'questions')
+        fields = ('id', 'name')
 
 
 class TestStateSerializer(serializers.HyperlinkedModelSerializer):
