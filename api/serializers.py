@@ -18,7 +18,7 @@ class LecturerSerializer(serializers.HyperlinkedModelSerializer):
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Answer
-        fields = ('content', 'good')
+        fields = ('id', 'content', 'good')
 
 
 class HiddenAnswerSerializer(serializers.HyperlinkedModelSerializer):
@@ -38,7 +38,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 class ShortQuestionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Question
-        fields = ('content',)
+        fields = ('id', 'content',)
 
 
 class QuestionWithoutAnswerSerializer(serializers.HyperlinkedModelSerializer):
@@ -79,19 +79,12 @@ class TestWithHiddenAnswersSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'name', 'questions')
 
 
-class SubmittedAnswerSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = SubmittedAnswer
-        fields = ('answer',)
-
-
 class SolvedTestSerializer(serializers.HyperlinkedModelSerializer):
     test = ShortTestSerializer(many=False)
-    answers = SubmittedAnswerSerializer(many=True)
 
     class Meta:
         model = SolvedTest
-        fields = ('test', 'answers')
+        fields = ('test', 'score', 'max')
 
 
 class StudentSerializer(serializers.HyperlinkedModelSerializer):

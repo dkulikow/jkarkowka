@@ -48,6 +48,7 @@ class SolvedTest(models.Model):
     test = models.ForeignKey(Test)
     answers = models.ManyToManyField(Answer)
     score = models.IntegerField(default=0, blank=True, editable=False)
+    max = models.IntegerField(default=0, blank=True, editable=False)
 
     def __str__(self):
         return '%s, %s' % (self.test, self.answers)

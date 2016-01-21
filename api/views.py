@@ -86,6 +86,7 @@ def tests(request):
                         score += 1
                     solved_test.answers.add(answer_object)
                 solved_test.score = score
+                solved_test.max = len(received_answers)
                 solved_test.save()
                 student = Student.objects.get(user__username=username)
                 student.solved_tests.add(solved_test)
