@@ -1,4 +1,5 @@
 import json
+from itertools import chain
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -30,8 +31,22 @@ def tests(request):
             return Response(serializer.data)
         if data["method"] == "get_test":
             if "test_id" in data:
+                username = request.user.username
+                student = Student.objects.get(user__username=username)
+                groups = Group.objects.filter(students__user__username=username)
+                queryset1 = ActiveTestForGroup.objects.filter(group__in=groups).values("test__id")
+                queryset2 = ActiveTestForStudent.objects.filter(student=student).values("test__id")
+                print(queryset1.count())
+                print(queryset2.count())
+                print(queryset1[0]['test__id'])
+                print(queryset2)
+                print(data["test_id"])
                 test_id = data["test_id"]
-                queryset = Test.objects.filter(id__exact=test_id)
+                if test_id == queryset1[0]['test__id']:
+                    print("dupa")
+                    queryset = Test.objects.filter(id__exact=test_id)
+                else:
+                    queryset = None
                 serializer = TestWithHiddenAnswersSerializer(queryset, many=True, context={'request': request})
                 return Response(serializer.data)
         if data["method"] == "get_key":
