@@ -38,7 +38,6 @@ def tests(request):
             if "test_id" in data:
                 test_id = data["test_id"]
                 key = Test.objects.get(id__exact=test_id).key
-                print(type(key))
                 response_data = [{"key": key}]
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
         if data["method"] == "change_state":

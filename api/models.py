@@ -50,10 +50,10 @@ class SolvedTest(models.Model):
     max = models.IntegerField(default=0, blank=True, editable=False)
 
     def __str__(self):
-        return '%s, %s' % (self.test, self.answers)
+        return '%s' % (self.test,)
 
     def __unicode__(self):
-        return '%s, %s' % (self.test, self.answers)
+        return '%s' % (self.test,)
 
 
 class Student(models.Model):
