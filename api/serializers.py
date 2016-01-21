@@ -32,7 +32,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('content', 'answers')
+        fields = ('id', 'content', 'answers')
 
 
 class ShortQuestionSerializer(serializers.HyperlinkedModelSerializer):

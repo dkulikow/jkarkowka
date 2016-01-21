@@ -41,6 +41,7 @@ class Test(models.Model):
 
 
 class SubmittedAnswer(models.Model):
+    
     answer = models.CharField(max_length=64)
 
 
