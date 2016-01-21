@@ -106,8 +106,7 @@ class StudentSerializer(serializers.HyperlinkedModelSerializer):
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     lecturer = LecturerSerializer()
     students = StudentSerializer(many=True)
-    activated_tests = TestStateSerializer(many=True)
 
     class Meta:
         model = Group
-        fields = ('id', 'name', 'lecturer', 'students', 'activated_tests')
+        fields = ('id', 'name', 'lecturer', 'students',)

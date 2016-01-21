@@ -71,26 +71,21 @@ def tests(request):
             response_data = {"test_name": test.name}
             return HttpResponse(json.dumps(response_data), content_type="application/json")
         if data["method"] == "send":
-            test_id = data["test_id"]
-            answers = data["answers"]
             if request.user.is_authenticated():
+                test_id = data["test_id"]
+                received_answers = data["answers"]
                 username = request.user.username
+
                 test = Test.objects.get(id__exact=test_id)
                 solved_test = SolvedTest(test=test)
                 solved_test.save()
-                for ans in answers:
-                    print(ans)
-                    my_ans = SubmittedAnswer(answer=ans)
-                    my_ans.save()
-                    solved_test.answers.add(my_ans)
                 score = 0
-                questions = test.questions.all()
-                for question in questions:
-                    all_answers = question.answers.all()
-                    for ans in all_answers:
-                        for sub_ans in answers:
-                            if ans.content == sub_ans:
-                                score += 1
+                for answer in received_answers:
+                    answer_object = Answer.objects.get(id__exact=answer["answer_id"])
+                    if answer_object.good:
+                        score += 1
+                    solved_test.answers.add(answer_object)
+                solved_test.score = score
                 solved_test.save()
                 student = Student.objects.get(user__username=username)
                 student.solved_tests.add(solved_test)

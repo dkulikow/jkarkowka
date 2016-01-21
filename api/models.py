@@ -41,13 +41,12 @@ class Test(models.Model):
 
 
 class SubmittedAnswer(models.Model):
-    
     answer = models.CharField(max_length=64)
 
 
 class SolvedTest(models.Model):
     test = models.ForeignKey(Test)
-    answers = models.ManyToManyField(SubmittedAnswer)
+    answers = models.ManyToManyField(Answer)
     score = models.IntegerField(default=0, blank=True, editable=False)
 
     def __str__(self):
