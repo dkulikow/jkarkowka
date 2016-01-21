@@ -82,9 +82,10 @@ def tests(request):
                 solved_test.save()
                 score = 0
                 for answer in received_answers:
-                    answer_object = Answer.objects.get(id__exact=answer["answer_id"])
-                    if answer_object.good:
-                        score += 1
+                    if Answer.objects.filter(id__exact=answer["answer_id"]).count() > 0:
+                        answer_object = Answer.objects.get(id__exact=answer["answer_id"])
+                        if answer_object.good:
+                            score += 1
                 solved_test.score = score
                 solved_test.max = len(received_answers)
                 solved_test.save()
