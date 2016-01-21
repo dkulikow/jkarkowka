@@ -32,7 +32,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('content', 'type', 'answers')
+        fields = ('content', 'answers')
 
 
 class ShortQuestionSerializer(serializers.HyperlinkedModelSerializer):
@@ -46,7 +46,7 @@ class QuestionWithoutAnswerSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('content', 'type', 'answers')
+        fields = ('id', 'content', 'answers')
 
 
 class TestSerializer(serializers.HyperlinkedModelSerializer):
@@ -54,7 +54,7 @@ class TestSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Test
-        fields = ('id', 'state', 'key', 'name', 'questions')
+        fields = ('id', 'key', 'name', 'questions')
 
 
 class ShortTestSerializer(serializers.HyperlinkedModelSerializer):
@@ -68,7 +68,7 @@ class ShortTestSerializer(serializers.HyperlinkedModelSerializer):
 class TestStateSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Test
-        fields = ('id', 'state')
+        fields = ('id',)
 
 
 class TestWithHiddenAnswersSerializer(serializers.HyperlinkedModelSerializer):
@@ -76,7 +76,7 @@ class TestWithHiddenAnswersSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Test
-        fields = ('name', 'questions')
+        fields = ('id', 'name', 'questions')
 
 
 class SubmittedAnswerSerializer(serializers.HyperlinkedModelSerializer):
