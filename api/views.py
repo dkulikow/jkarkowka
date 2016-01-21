@@ -57,6 +57,8 @@ def tests(request):
                     activated_relation = ActiveTestForGroup(group=group, test=test)
                     activated_relation.save()
             elif state == "0":
+                test.key = random.randint(0,15)
+                test.save()
                 if "students_id" in data:
                     students_id = data["students_id"]
                     print(students_id)
@@ -75,7 +77,6 @@ def tests(request):
                 test_id = data["test_id"]
                 received_answers = data["answers"]
                 username = request.user.username
-
                 test = Test.objects.get(id__exact=test_id)
                 solved_test = SolvedTest(test=test)
                 solved_test.save()
